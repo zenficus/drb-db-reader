@@ -1,0 +1,43 @@
+name: Build Binary Artifacts
+
+on:
+  push:
+    tags:
+      - 'v[0-9]*.[0-9]*.[0-9]*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build Normal (No Runtime)
+        run: |
+          dotnet publish DRBDBReader.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true /p:PublishReadyToRun=true -o ./publish/normal
+
+      - name: Build With Runtime
+        run: |
+          dotnet publish DRBDBReader.csproj -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true -o ./publish/withruntime
+
+      - name: Rename outputs for clarity
+        run: |
+          mv ./publish/normal/DRBDBReader.exe ./publish/normal/DRBDBReader-${{ github.ref_name }}.exe
+          mv ./publish/withruntime/DRBDBReader.exe ./publish/withruntime/DRBDBReader-${{ github.ref_name }}-withRT.exe
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: DRBDBReader-binaries-${{ github.ref_name }}
+          path: ./publish/
+          if-no-files-found: error
