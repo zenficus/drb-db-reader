@@ -1,4 +1,4 @@
-﻿namespace DRBDBReader
+namespace DRBDBReader
 {
 	partial class frmMain
 	{

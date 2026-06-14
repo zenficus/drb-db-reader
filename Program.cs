@@ -1,4 +1,4 @@
-﻿/*
+/*
  * DRBDBReader
  * Copyright (C) 2016, Kyle Repinski
  *
