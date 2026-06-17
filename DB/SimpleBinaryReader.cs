@@ -32,7 +32,7 @@ namespace DRBDBReader.DB
 		public SimpleBinaryReader( FileStream dbFile )
 		{
 			this.rawDB = new byte[dbFile.Length];
-			dbFile.Read( this.rawDB, 0, this.rawDB.Length );
+			dbFile.ReadExactly( this.rawDB, 0, this.rawDB.Length );
 		}
 
 		/// <summary>
