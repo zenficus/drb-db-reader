@@ -12,7 +12,7 @@ This is an **experimental** fork for experimental experiments *without any promi
 
 Intentions:
 - [x] Rework project base to make possible build in lightweight VSCode with modern .NET
-- [ ] Provide reproducible project build by using GitHub Actions
-- [ ] Create a tool usage documentation
+- [x] Provide reproducible project build by using GitHub Actions
 - [ ] Rework tool to use CLI or TUI instead of GUI (or maybe rework GUI) just to make use of this tool easier
 - [ ] Implement a reliable way to link stubbed messages to processes/scripts that are using multiple messages
+- [ ] Create a tool usage documentation
