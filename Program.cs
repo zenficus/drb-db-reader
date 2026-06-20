@@ -1,6 +1,7 @@
 /*
  * DRBDBReader
  * Copyright (C) 2016, Kyle Repinski
+ * Copyright (C) 2026 Ivan Feoctistov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,22 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-using System;
-using System.Windows.Forms;
 
 namespace DRBDBReader
 {
-	static class Program
+	internal class Program
 	{
 		/// <summary>
 		/// The main entry point for the application.
 		/// </summary>
-		[STAThread]
-		static void Main()
+		private static void Main(string[] args)
 		{
-			Application.EnableVisualStyles();
-			Application.SetCompatibleTextRenderingDefault( false );
-			Application.Run( new frmMain() );
+			var terminal = new CLI();
+			terminal.Run();
 		}
 	}
 }
