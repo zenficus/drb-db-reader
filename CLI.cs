@@ -30,8 +30,8 @@ namespace DRBDBReader
 		private Database _db;
 		public void Run()
 		{
-			Console.OutputEncoding = System.Text.Encoding.UTF8;
-			Console.InputEncoding = System.Text.Encoding.UTF8;
+			Console.OutputEncoding = Encoding.UTF8;
+			Console.InputEncoding = Encoding.UTF8;
 			Console.ForegroundColor = ConsoleColor.Cyan;
 			Console.Write("Loading database.mem... ");
 			try
@@ -50,8 +50,9 @@ namespace DRBDBReader
 				return;
 			}
 			Console.ForegroundColor = ConsoleColor.Cyan;
-			Console.WriteLine("Enter command below and press \"enter\".");
-			Console.WriteLine("Command \"help\" will show the list of all available commands.");
+			Console.WriteLine("Enter command below and press 'enter'.");
+			Console.WriteLine("Command 'exit' will terminate the program.");
+			Console.WriteLine("Command 'help' will show the list of all available commands.");
 			Console.ResetColor();
 
 			while (true)
@@ -117,24 +118,31 @@ namespace DRBDBReader
 			}
 		}
 
-		private string GetHelp()
+		private static string GetHelp()
 		{
-			return "available commands:" + Environment.NewLine +
-			"\tstringid [id] : find string by ID" + Environment.NewLine +
-			"\tstringsearch [text] : find string by content" + Environment.NewLine +
-			"\ttxid [id] : get details of TX message" + Environment.NewLine +
-			"\ttasearch [text] : search for TX messages by content" + Environment.NewLine +
-			"\ttxrunconverter [id] [data] : conv???" + Environment.NewLine +
-			"\ttxrunconvertermetric [id] [data] : conv???" + Environment.NewLine +
-			"\tdumpconverter [id] : ???" + Environment.NewLine +
-			"\tmodid [id] : ???" + Environment.NewLine +
-			"\tmodlist : ???" + Environment.NewLine +
-			"\tmodsearch [text] : ???" + Environment.NewLine +
-			"\tmodtxlist [id] : ???" + Environment.NewLine +
-			"\tdumptableinfo [id] : ???" + Environment.NewLine +
-			"\tstringidfuzz [id] [col] : ???" + Environment.NewLine +
-			"\tgenericidfuzz [id] [col] [id2] [col2] : ???" + Environment.NewLine +
-			"\texit : ???";
+			return "search commands:" + Environment.NewLine +
+			"    ModList             show all known modules" + Environment.NewLine +
+			"    ModSearch [text]    find module with name that contains specified text" + Environment.NewLine +
+			"    ModTxList [id]      show all known messages for module specified by ID" + Environment.NewLine +
+			"    TxSearch [text]     find TX messages that contain specified text" + Environment.NewLine +
+			"                        note: '&&' can be used to search multiple words" + Environment.NewLine +
+			"    StringSearch [text] find string that contains specified text" + Environment.NewLine +
+			"                        note: '&&' can be used to search multiple words" + Environment.NewLine +
+			"    StringID [id]       show content of string specified by ID" + Environment.NewLine +
+			"detailed info commands:" + Environment.NewLine +
+			"    ModID [id]          get module name specified by module ID" + Environment.NewLine +
+			"    TxID [id]           get details of TX message specified by ID" + Environment.NewLine +
+			"    DumpConverter [id]  get details of converter specified by ID" + Environment.NewLine +
+			"converter commands:" + Environment.NewLine +
+			"    TxRunConverter [id] [val]" + Environment.NewLine +
+			"        convert provided raw value using converter specified by ID (imperial)" + Environment.NewLine +
+			"    TxRunConverterMetric [id] [val]" + Environment.NewLine +
+			"        convert provided raw value using converter specified by ID (metric)" + Environment.NewLine +
+			"uncharted territory (not for regular use, but no one can stop you):" + Environment.NewLine +
+			"    DumpTableInfo [tableID]" + Environment.NewLine +
+			"    StringIDFuzz [tableID] [column]" + Environment.NewLine +
+			"    GenericIDFuzz [fuzzerTblID] [fuzzerColID] [fuzzingTblID] [fuzzingColID]" + Environment.NewLine +
+			"exit    exit and terminate the program";
 		}
 
 		private static ushort ParseU16(string input)
@@ -412,7 +420,7 @@ namespace DRBDBReader
 		private (OpStatus, string) ExecuteGenericIDFuzz(string arg)
 		{
 			string[] argsplit = arg.Split(' ', 2);
-			if (argsplit.Length < 4) return (OpStatus.Warning, "not enough data, need [fuzzertable] [fuzzercolumn] [fuzzingtable] [fuzzingcolumn]");
+			if (argsplit.Length < 4) return (OpStatus.Warning, "not enough data, need [fuzzerTableID] [fuzzerColumnID] [fuzzingTableID] [fuzzingColumnID]");
 			ushort fuzzerTableID = ParseU16(argsplit[0]);
 			byte fuzzerTableColumn = (byte)ParseU16(argsplit[1]);
 			ushort fuzzingTableID = ParseU16(argsplit[2]);
