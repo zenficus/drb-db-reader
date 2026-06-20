@@ -24,11 +24,11 @@ jobs:
 
       - name: Build Normal (No Runtime)
         run: |
-          dotnet publish DRBDBReader.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true /p:PublishReadyToRun=true -o ./publish/normal
+          dotnet publish DRBDBReader.csproj -c Release
 
       - name: Build With Runtime
         run: |
-          dotnet publish DRBDBReader.csproj -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true -o ./publish/withruntime
+          dotnet publish DRBDBReader.csproj -c ReleaseWithRuntime
 
       - name: Rename outputs for clarity
         run: |
