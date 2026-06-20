@@ -3,5 +3,25 @@
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net10.0</TargetFramework>
 		<ImplicitUsings>disable</ImplicitUsings>
+		<AnalysisMode>All</AnalysisMode>
+		<AnalysisLevel>latest</AnalysisLevel>
+		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<Optimize>true</Optimize>
+		<DefineConstants>RELEASE</DefineConstants>
+		<DebugSymbols>false</DebugSymbols>
+		<SelfContained>false</SelfContained>
+		<PublishSingleFile>false</PublishSingleFile>
+		<PublishDir>publish/normal</PublishDir>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)' == 'ReleaseWithRuntime'">
+		<Optimize>true</Optimize>
+		<DefineConstants>RELEASE</DefineConstants>
+		<DebugSymbols>false</DebugSymbols>
+		<SelfContained>true</SelfContained>
+		<PublishSingleFile>true</PublishSingleFile>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<PublishDir>publish/withruntime</PublishDir>
 	</PropertyGroup>
 </Project>
