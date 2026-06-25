@@ -6,6 +6,7 @@
 		<AnalysisMode>All</AnalysisMode>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+		<EnforceCodeAnalysisInBuild>true</EnforceCodeAnalysisInBuild>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
 		<Optimize>true</Optimize>

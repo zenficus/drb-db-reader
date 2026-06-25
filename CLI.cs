@@ -17,6 +17,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using DRBDBReader.DB;
@@ -24,7 +25,7 @@ using DRBDBReader.DB.Records;
 
 namespace DRBDBReader
 {
-	public class CLI
+	internal sealed class CLI
 	{
 		private enum OpStatus { OK, Warning, Error };
 		private Database _db;
@@ -64,9 +65,10 @@ namespace DRBDBReader
 				string input = Console.ReadLine()?.Trim();
 				if (string.IsNullOrEmpty(input)) continue;
 				if (input.Equals("exit", StringComparison.OrdinalIgnoreCase)) break;
-				var (status, result) = ProcessCommand(input);
+				(OpStatus status, string result) = ProcessCommand(input);
 				Console.ForegroundColor = status switch
 				{
+					OpStatus.OK => ConsoleColor.White,
 					OpStatus.Warning => ConsoleColor.Yellow,
 					OpStatus.Error => ConsoleColor.Red,
 					_ => ConsoleColor.White,
@@ -149,21 +151,21 @@ namespace DRBDBReader
 		{
 			ushort result;
 
-			if (input.StartsWith("0x"))
+			if (input.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
 			{
 				result = Convert.ToUInt16(input[2..], 16);
 			}
-			else if (input.StartsWith("0b"))
+			else if (input.StartsWith("0b", StringComparison.OrdinalIgnoreCase))
 			{
 				result = Convert.ToUInt16(input[2..], 2);
 			}
-			else if (input.StartsWith("0o"))
+			else if (input.StartsWith("0o", StringComparison.OrdinalIgnoreCase))
 			{
 				result = Convert.ToUInt16(input[2..], 8);
 			}
 			else
 			{
-				result = Convert.ToUInt16(input);
+				result = Convert.ToUInt16(input, CultureInfo.InvariantCulture);
 			}
 
 			return result;
@@ -173,21 +175,21 @@ namespace DRBDBReader
 		{
 			uint result;
 
-			if (input.StartsWith("0x"))
+			if (input.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
 			{
 				result = Convert.ToUInt32(input[2..], 16);
 			}
-			else if (input.StartsWith("0b"))
+			else if (input.StartsWith("0b", StringComparison.OrdinalIgnoreCase))
 			{
 				result = Convert.ToUInt32(input[2..], 2);
 			}
-			else if (input.StartsWith("0o"))
+			else if (input.StartsWith("0o", StringComparison.OrdinalIgnoreCase))
 			{
 				result = Convert.ToUInt32(input[2..], 8);
 			}
 			else
 			{
-				result = Convert.ToUInt32(input);
+				result = Convert.ToUInt32(input, CultureInfo.InvariantCulture);
 			}
 
 			return result;
@@ -197,21 +199,21 @@ namespace DRBDBReader
 		{
 			long result;
 
-			if (input.StartsWith("0x"))
+			if (input.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
 			{
 				result = Convert.ToInt64(input[2..], 16);
 			}
-			else if (input.StartsWith("0b"))
+			else if (input.StartsWith("0b", StringComparison.OrdinalIgnoreCase))
 			{
 				result = Convert.ToInt64(input[2..], 2);
 			}
-			else if (input.StartsWith("0o"))
+			else if (input.StartsWith("0o", StringComparison.OrdinalIgnoreCase))
 			{
 				result = Convert.ToInt64(input[2..], 8);
 			}
 			else
 			{
-				result = Convert.ToInt64(input);
+				result = Convert.ToInt64(input, CultureInfo.InvariantCulture);
 			}
 
 			return result;
@@ -220,7 +222,7 @@ namespace DRBDBReader
 		private (OpStatus, string) ExecuteStringID(string arg)
 		{
 			ushort id = ParseU16(arg);
-			var record = (StringRecord)_db.tables[Database.TABLE_STRINGS].getRecord(id);
+			StringRecord record = (StringRecord)_db.tables[Database.TABLE_STRINGS].getRecord(id);
 
 			if (record == null) return (OpStatus.OK, "(null)");
 			string result = $"text: {record.text}";
@@ -231,17 +233,17 @@ namespace DRBDBReader
 
 		private (OpStatus, string) ExecuteStringSearch(string arg)
 		{
-			var s = new StringBuilder();
+			StringBuilder s = new();
 
-			foreach (StringRecord r in _db.tables[Database.TABLE_STRINGS].records)
+			foreach (StringRecord r in (StringRecord[])_db.tables[Database.TABLE_STRINGS].records)
 			{
-				bool matchText = r.text?.ToLowerInvariant().Contains(arg) ?? false;
-				bool matchOBD = r.obdCodeString?.ToLowerInvariant().Contains(arg) ?? false;
+				bool matchText = r.text?.Contains(arg, StringComparison.OrdinalIgnoreCase) ?? false;
+				bool matchOBD = r.obdCodeString?.Contains(arg, StringComparison.OrdinalIgnoreCase) ?? false;
 				if (matchText || matchOBD)
 				{
-					s.Append($"0x{r.id:x4}; text: {r.text}");
-					if (!string.IsNullOrWhiteSpace(r.obdCodeString)) s.Append($"; OBD: {r.obdCodeString}");
-					s.AppendLine();
+					_ = s.Append(CultureInfo.InvariantCulture, $"0x{r.id:x4}; text: {r.text}");
+					if (!string.IsNullOrWhiteSpace(r.obdCodeString)) _ = s.Append(CultureInfo.InvariantCulture, $"; OBD: {r.obdCodeString}");
+					_ = s.AppendLine();
 				}
 			}
 
@@ -270,8 +272,8 @@ namespace DRBDBReader
 
 		private (OpStatus, string) ExecuteTxSearch(string arg)
 		{
-			var s = new StringBuilder();
-			string[] args = arg.Contains(" && ") ? arg.Split(" && ", StringSplitOptions.RemoveEmptyEntries) : null;
+			StringBuilder s = new();
+			string[] args = arg.Contains(" && ", StringComparison.OrdinalIgnoreCase) ? arg.Split(" && ", StringSplitOptions.RemoveEmptyEntries) : null;
 
 			for (uint i = 0x80000000; i < 0x80009000; i++)
 			{
@@ -284,17 +286,17 @@ namespace DRBDBReader
 						bool match = true;
 						foreach (string f in args)
 						{
-							if (!tmp.Contains(f))
+							if (!tmp.Contains(f, StringComparison.OrdinalIgnoreCase))
 							{
 								match = false;
 								break;
 							}
-							if (match) s.AppendLine($"{tmp}; 0x{i:x}");
+							if (match) _ = s.AppendLine(CultureInfo.InvariantCulture, $"{tmp}; 0x{i:x}");
 						}
 					}
-					else if (tmp.Contains(arg))
+					else if (tmp.Contains(arg, StringComparison.OrdinalIgnoreCase))
 					{
-						s.AppendLine($"{tmp}; 0x{i:x}");
+						_ = s.AppendLine(CultureInfo.InvariantCulture, $"{tmp}; 0x{i:x}");
 					}
 				}
 				catch
@@ -325,8 +327,8 @@ namespace DRBDBReader
 
 		private (OpStatus, string) ExecuteModSearch(string arg, bool isListRequest)
 		{
-			var s = new StringBuilder();
-			string[] args = arg.Contains(" && ") ? arg.Split(" && ", StringSplitOptions.RemoveEmptyEntries) : null;
+			StringBuilder s = new();
+			string[] args = arg.Contains(" && ", StringComparison.OrdinalIgnoreCase) ? arg.Split(" && ", StringSplitOptions.RemoveEmptyEntries) : null;
 
 			for (ushort i = 0x0000; i < 0x2000; i++)
 			{
@@ -336,27 +338,25 @@ namespace DRBDBReader
 					if (tmp == null) continue;
 					if (isListRequest)
 					{
-						s.AppendLine($"{tmp}; 0x{i:x}");
+						_ = s.AppendLine(CultureInfo.InvariantCulture, $"{tmp}; 0x{i:x}");
 						continue;
 					}
-
-					string tmpl = tmp.ToLowerInvariant(); //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-					if (args != null)
+					else if (args != null)
 					{
 						bool match = true;
 						foreach (string f in args)
 						{
-							if (!tmpl.Contains(f)) //@@@@@@@@@@@ MAYBE NOT NEEDED AND CAN BE COMPARED WITH CASE INSENSITIVE FUNCTION INSTEAD OF MULTIME CONVERSIONS @@@@@@@@@@@@@@@@@@@@@
+							if (!tmp.Contains(f, StringComparison.OrdinalIgnoreCase))
 							{
 								match = false;
 								break;
 							}
 						}
-						if (match) s.AppendLine($"{tmp}; 0x{i:x}"); ////@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+						if (match) _ = s.AppendLine(CultureInfo.InvariantCulture, $"{tmp}; 0x{i:x}");
 					}
-					else if (tmpl.Contains(arg))
+					else if (tmp.Contains(arg, StringComparison.OrdinalIgnoreCase))
 					{
-						s.AppendLine($"{tmp}; 0x{i:x}");
+						_ = s.AppendLine(CultureInfo.InvariantCulture, $"{tmp}; 0x{i:x}");
 					}
 				}
 				catch
@@ -375,13 +375,13 @@ namespace DRBDBReader
 
 			if (record == null) return (OpStatus.Warning, "not found");
 
-			var s = new StringBuilder();
-			var mrecord = (ModuleRecord)record;
+			StringBuilder s = new();
+			ModuleRecord mrecord = (ModuleRecord)record;
 
 			foreach (TXRecord txrec in mrecord.dataelements)
 			{
 				string tmp = _db.getTX(txrec.id);
-				s.AppendLine($"{tmp}; 0x{txrec.id:x}");
+				_ = s.AppendLine(CultureInfo.InvariantCulture, $"{tmp}; 0x{txrec.id:x}");
 			}
 
 			return s.Length > 0 ? (OpStatus.OK, s.ToString().TrimEnd()) : (OpStatus.Warning, "not found");
