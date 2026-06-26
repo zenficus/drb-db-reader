@@ -13,7 +13,7 @@
 		<DefineConstants>RELEASE</DefineConstants>
 		<DebugSymbols>false</DebugSymbols>
 		<SelfContained>false</SelfContained>
-		<PublishSingleFile>false</PublishSingleFile>
+		<PublishSingleFile>true</PublishSingleFile>
 		<PublishDir>publish/normal</PublishDir>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)' == 'ReleaseWithRuntime'">
